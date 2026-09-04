@@ -75,12 +75,17 @@ func (s *Service) resolveResolver(ref string) (Resolver, error) {
 	if r, ok := s.byID[ref]; ok {
 		return r, nil
 	}
-	// Treat as a literal address.
-	r := Resolver{ID: ref, Name: ref, Address: ref, Protocol: "udp"}
-	if strings.HasPrefix(ref, "https://") || strings.HasPrefix(ref, "http://") {
-		r.Protocol = "https"
+	// Treat as a literal address. Ad-hoc custom resolvers are deliberately
+	// limited to plain DNS servers (an IP or host, queried over UDP with TCP
+	// fallback). Allowing an arbitrary DoH/HTTP(S) URL here would let an
+	// unauthenticated caller make the server POST to any URL of their choosing
+	// — a server-side request forgery (SSRF) primitive against internal
+	// networks. DoH and DoT endpoints must therefore be defined in the
+	// configured resolver set and referenced by id, never supplied ad hoc.
+	if strings.Contains(ref, "://") || strings.ContainsAny(ref, "/?#") {
+		return Resolver{}, fmt.Errorf("custom resolver %q is not allowed: ad-hoc resolvers must be a plain DNS server address (IP or host); DoH/DoT endpoints must be pre-configured and referenced by id", ref)
 	}
-	return r, nil
+	return Resolver{ID: ref, Name: ref, Address: ref, Protocol: "udp"}, nil
 }
 
 // job is one unit of work in the fan-out.
@@ -141,13 +146,26 @@ func (s *Service) Do(ctx context.Context, req Request) (*Response, error) {
 
 	// Build the job list.
 	var jobs []job
+	var invalid []Query
 	for _, h := range hosts {
 		qhost := h
 		if req.Reverse {
 			arpa, err := reverseName(h)
 			if err != nil {
-				// Record the error as a completed job with no resolution.
-				jobs = append(jobs, job{hostname: h, rtype: "PTR", resolver: resolvers[0]})
+				// Surface the validation error to the caller rather than
+				// silently querying the invalid input as an ordinary name.
+				for _, r := range resolvers {
+					q := Query{
+						Hostname: h,
+						Type:     "PTR",
+						Resolver: r,
+						Protocol: protoOrDefault(r.Protocol),
+						Server:   r.Address,
+						Error:    err.Error(),
+					}
+					q.Raw = renderRaw(&q)
+					invalid = append(invalid, q)
+				}
 				continue
 			}
 			qhost = arpa
@@ -185,6 +203,9 @@ func (s *Service) Do(ctx context.Context, req Request) (*Response, error) {
 	if auto && !req.Trace {
 		results = pruneEmptyDiscovery(results)
 	}
+
+	// Include any validation errors (e.g. invalid IPs in reverse mode).
+	results = append(results, invalid...)
 
 	return &Response{
 		Queries:    results,

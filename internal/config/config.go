@@ -95,12 +95,14 @@ func Load(path string) (Config, error) {
 		if err != nil {
 			return cfg, fmt.Errorf("reading config %s: %w", path, err)
 		}
-		// Unmarshal onto the defaults so partial files are additive for scalars.
-		var fileCfg Config
-		if err := yaml.Unmarshal(data, &fileCfg); err != nil {
+		// Unmarshal directly onto the defaults: yaml.v3 only overwrites keys
+		// that are present in the document, so a partial file overrides just the
+		// fields it names (including an explicit `allow_custom_resolvers: false`)
+		// and leaves everything else at its default. A present `resolvers:` or
+		// `default_resolvers:` list replaces the corresponding default slice.
+		if err := yaml.Unmarshal(data, &cfg); err != nil {
 			return cfg, fmt.Errorf("parsing config %s: %w", path, err)
 		}
-		mergeFile(&cfg, fileCfg)
 	}
 
 	applyEnv(&cfg)
@@ -109,39 +111,6 @@ func Load(path string) (Config, error) {
 		return cfg, err
 	}
 	return cfg, nil
-}
-
-// mergeFile overlays non-zero values from the parsed file onto cfg.
-func mergeFile(cfg *Config, f Config) {
-	if f.Server.Host != "" {
-		cfg.Server.Host = f.Server.Host
-	}
-	if f.Server.Port != 0 {
-		cfg.Server.Port = f.Server.Port
-	}
-	if f.Server.TrustedProxy {
-		cfg.Server.TrustedProxy = true
-	}
-	if f.Query.Timeout != 0 {
-		cfg.Query.Timeout = f.Query.Timeout
-	}
-	if f.Query.Concurrency != 0 {
-		cfg.Query.Concurrency = f.Query.Concurrency
-	}
-	if f.Query.MaxHostnames != 0 {
-		cfg.Query.MaxHostnames = f.Query.MaxHostnames
-	}
-	if f.Query.MaxResolvers != 0 {
-		cfg.Query.MaxResolvers = f.Query.MaxResolvers
-	}
-	// A file may explicitly disable custom resolvers.
-	cfg.Query.AllowCustomResolvers = f.Query.AllowCustomResolvers || cfg.Query.AllowCustomResolvers
-	if len(f.Resolvers) > 0 {
-		cfg.Resolvers = f.Resolvers
-	}
-	if len(f.DefaultResolvers) > 0 {
-		cfg.DefaultResolvers = f.DefaultResolvers
-	}
 }
 
 // applyEnv overrides configuration from DIGLETT_* environment variables.

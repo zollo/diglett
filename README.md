@@ -14,8 +14,8 @@ dependencies and no database.
   curated set of common record types (A, AAAA, CNAME, MX, NS, TXT, SOA, CAA,
   SRV) and shows whichever actually exist.
 - 🌐 **Well-known resolvers built in** — Google, Cloudflare, Quad9, OpenDNS,
-  AdGuard, plus DNS-over-HTTPS variants. Add your own, or query any resolver
-  address ad-hoc.
+  AdGuard, plus DNS-over-HTTPS variants. Configure your own, or query any plain
+  DNS server address ad-hoc.
 - 🔁 **Reverse (PTR) lookups**, **`+trace`-style delegation tracing** from the
   root servers, and **DNSSEC** record requests.
 - 🧰 **API-first** — the web UI is just a client of the same unauthenticated
@@ -165,7 +165,7 @@ for a fully commented reference.
 | `DIGLETT_CONCURRENCY` | `12` | Max simultaneous exchanges per request. |
 | `DIGLETT_MAX_HOSTNAMES` | `100` | Max hostnames per request (0 = unlimited). |
 | `DIGLETT_MAX_RESOLVERS` | `20` | Max resolvers per request (0 = unlimited). |
-| `DIGLETT_ALLOW_CUSTOM_RESOLVERS` | `true` | Allow ad-hoc resolver addresses. |
+| `DIGLETT_ALLOW_CUSTOM_RESOLVERS` | `true` | Allow ad-hoc plain-DNS resolver addresses (see note). |
 | `DIGLETT_DEFAULT_RESOLVERS` | `google,cloudflare,quad9` | Pre-selected resolver IDs. |
 | `DIGLETT_RESOLVERS` | built-in list | Inline resolver definitions (see below). |
 
@@ -184,6 +184,14 @@ DIGLETT_RESOLVERS="google|Google|8.8.8.8|udp|Public, cf-doh|Cloudflare DoH|https
 | `tcp` | Plain TCP | `host` or `host:port` |
 | `tls` | DNS-over-TLS (DoT) | `host` or `host:port` (default `:853`) |
 | `https` | DNS-over-HTTPS (DoH) | full URL, e.g. `https://dns.google/dns-query` |
+
+> **Security note.** `DIGLETT_ALLOW_CUSTOM_RESOLVERS` only permits ad-hoc
+> resolvers that are **plain DNS servers** (an IP or host, queried over
+> UDP/TCP). DoH/DoT endpoints — which involve the server making an HTTP(S)
+> request — can only be defined in the configured resolver set and referenced
+> by `id`; arbitrary URLs are rejected so the unauthenticated API cannot be
+> abused as a server-side request forgery (SSRF) vector. Set it to `false` to
+> disallow ad-hoc resolvers entirely.
 
 ---
 

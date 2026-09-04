@@ -1,11 +1,30 @@
 package lookup
 
 import (
+	"context"
 	"strings"
 	"testing"
 
 	"github.com/miekg/dns"
 )
+
+func TestReverseInvalidIPReturnsError(t *testing.T) {
+	s := NewService(Options{Resolvers: []Resolver{{ID: "r", Name: "R", Address: "192.0.2.1", Protocol: "udp"}}})
+	// A non-IP in reverse mode is entirely invalid, so no network query runs;
+	// the caller must still receive the validation error rather than a lookup
+	// of the raw string as an ordinary name.
+	resp, err := s.Do(context.Background(), Request{Hostnames: []string{"not-an-ip"}, Reverse: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(resp.Queries) != 1 {
+		t.Fatalf("expected 1 query, got %d", len(resp.Queries))
+	}
+	q := resp.Queries[0]
+	if q.Error == "" || q.Type != "PTR" || q.Hostname != "not-an-ip" {
+		t.Fatalf("expected PTR validation error for the raw input, got %+v", q)
+	}
+}
 
 func TestHostPort(t *testing.T) {
 	cases := []struct {
@@ -144,9 +163,12 @@ func TestResolveResolver(t *testing.T) {
 	if r.Protocol != "udp" || r.Address != "1.2.3.4" {
 		t.Fatalf("literal IP: %+v", r)
 	}
-	// Literal URL -> https.
-	r, _ = s.resolveResolver("https://dns.example/dns-query")
-	if r.Protocol != "https" {
-		t.Fatalf("literal URL protocol: %+v", r)
+	// Ad-hoc DoH/URL resolvers are rejected (SSRF hardening): they must be
+	// pre-configured and referenced by id.
+	if _, err := s.resolveResolver("https://dns.example/dns-query"); err == nil {
+		t.Fatal("expected error for ad-hoc URL resolver")
+	}
+	if _, err := s.resolveResolver("evil.example/path?x=1"); err == nil {
+		t.Fatal("expected error for ad-hoc resolver containing a path")
 	}
 }

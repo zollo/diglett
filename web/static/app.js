@@ -109,8 +109,9 @@
     const addr = customInput.value.trim();
     if (!addr) return;
     if (customResolvers.some((c) => c.id === addr)) { customInput.value = ""; return; }
-    const isURL = /^https?:\/\//i.test(addr);
-    const r = { id: addr, name: isURL ? "Custom (DoH)" : "Custom", address: addr, group: "Custom" };
+    // Ad-hoc resolvers are plain DNS servers only; DoH/DoT endpoints must be
+    // configured server-side (the API rejects arbitrary URLs to prevent SSRF).
+    const r = { id: addr, name: "Custom", address: addr, group: "Custom" };
     customResolvers.push(r);
     // Ensure a Custom group label exists, then append.
     let label = Array.from(resolverList.querySelectorAll(".resolver-group-label"))

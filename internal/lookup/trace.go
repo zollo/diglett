@@ -61,6 +61,9 @@ func (s *Service) trace(ctx context.Context, hostname, rtype string, seed Resolv
 			Zone:     zone,
 			Duration: rtt.Milliseconds(),
 		}
+		// Accumulate total elapsed time across hops so the result carries a
+		// meaningful QueryTimeMs regardless of which branch returns below.
+		q.QueryTimeMs += step.Duration
 
 		// If we received answers, we've reached the authoritative data.
 		if len(reply.Answer) > 0 {

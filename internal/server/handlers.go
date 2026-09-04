@@ -199,10 +199,17 @@ func (s *Server) requestBudget(hosts, resolvers int) time.Duration {
 		base = 5 * time.Second
 	}
 	// The service runs exchanges concurrently, so the budget need only grow
-	// modestly with the size of the fan-out.
+	// modestly with the size of the fan-out. Clamp the unit count before the
+	// multiplication so a very large fan-out (possible when the hostname and
+	// resolver limits are configured as 0 = unlimited) cannot overflow
+	// time.Duration and produce a negative or tiny timeout.
+	const maxUnits = 480
 	units := maxInt(hosts, 1) * maxInt(resolvers, 1)
+	if units > maxUnits || units < 1 {
+		units = maxUnits
+	}
 	total := base + base/4*time.Duration(units)
-	if total > 2*time.Minute {
+	if total <= 0 || total > 2*time.Minute {
 		total = 2 * time.Minute
 	}
 	return total

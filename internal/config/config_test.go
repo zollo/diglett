@@ -53,6 +53,27 @@ default_resolvers:
 	}
 }
 
+func TestFileCanDisableCustomResolvers(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	// AllowCustomResolvers defaults to true; a file must be able to turn it off.
+	yaml := "query:\n  allow_custom_resolvers: false\n"
+	if err := os.WriteFile(path, []byte(yaml), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Query.AllowCustomResolvers {
+		t.Fatal("expected allow_custom_resolvers=false from file to disable custom resolvers")
+	}
+	// A field the file did not mention keeps its default.
+	if cfg.Query.MaxHostnames != Default().Query.MaxHostnames {
+		t.Fatalf("unmentioned field changed: MaxHostnames=%d", cfg.Query.MaxHostnames)
+	}
+}
+
 func TestEnvOverrides(t *testing.T) {
 	t.Setenv("DIGLETT_PORT", "7777")
 	t.Setenv("DIGLETT_HOST", "1.2.3.4")
