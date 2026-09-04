@@ -1,0 +1,45 @@
+# Production Docker Compose deployment for Diglett.
+#
+#   docker compose up -d
+#
+# Diglett is a single stateless container. Configure it either with the
+# DIGLETT_* environment variables below, or by mounting a config file and
+# setting DIGLETT_CONFIG (see the commented volume block).
+
+services:
+  diglett:
+    image: ghcr.io/zollo/diglett:latest
+    # To build locally instead of pulling, comment out `image` above and use:
+    # build:
+    #   context: .
+    #   args:
+    #     VERSION: local
+    container_name: diglett
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DIGLETT_HOST: "0.0.0.0"
+      DIGLETT_PORT: "8080"
+      DIGLETT_TIMEOUT: "5s"
+      DIGLETT_MAX_HOSTNAMES: "100"
+      DIGLETT_MAX_RESOLVERS: "20"
+      DIGLETT_DEFAULT_RESOLVERS: "google,cloudflare,quad9"
+    # To use a config file instead of / in addition to env vars, mount it and
+    # point DIGLETT_CONFIG at it:
+    # volumes:
+    #   - ./config.yaml:/etc/diglett/config.yaml:ro
+    # environment:
+    #   DIGLETT_CONFIG: /etc/diglett/config.yaml
+    healthcheck:
+      # The distroless image has no shell; use the binary's own version check.
+      test: ["CMD", "/usr/local/bin/diglett", "-version"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

@@ -1,0 +1,25 @@
+# TrueNAS SCALE "Custom App" via Docker Compose (Electric Eel 24.10+).
+#
+# In the TrueNAS UI: Apps -> Discover Apps -> (top right) Custom App ->
+# "Install via YAML", then paste this file. Change the published port (left of
+# the colon) if 8080 is already in use on your system.
+
+services:
+  diglett:
+    image: ghcr.io/zollo/diglett:latest
+    container_name: diglett
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DIGLETT_HOST: "0.0.0.0"
+      DIGLETT_PORT: "8080"
+      DIGLETT_TIMEOUT: "5s"
+      DIGLETT_MAX_HOSTNAMES: "100"
+      DIGLETT_MAX_RESOLVERS: "20"
+      DIGLETT_DEFAULT_RESOLVERS: "google,cloudflare,quad9"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

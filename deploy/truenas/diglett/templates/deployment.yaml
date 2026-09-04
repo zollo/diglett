@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "diglett.name" . }}
+  labels:
+    {{- include "diglett.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "diglett.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "diglett.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+      containers:
+        - name: diglett
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: DIGLETT_HOST
+              value: "0.0.0.0"
+            - name: DIGLETT_PORT
+              value: "8080"
+            - name: DIGLETT_TIMEOUT
+              value: "{{ .Values.config.timeout }}"
+            - name: DIGLETT_MAX_HOSTNAMES
+              value: "{{ .Values.config.maxHostnames }}"
+            - name: DIGLETT_MAX_RESOLVERS
+              value: "{{ .Values.config.maxResolvers }}"
+            - name: DIGLETT_ALLOW_CUSTOM_RESOLVERS
+              value: "{{ .Values.config.allowCustomResolvers }}"
+            - name: DIGLETT_DEFAULT_RESOLVERS
+              value: "{{ .Values.config.defaultResolvers }}"
+            {{- range .Values.extraEnv }}
+            - name: {{ .name }}
+              value: "{{ .value }}"
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 2
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
