@@ -72,10 +72,13 @@ ghcr.io/zollo/diglett
 
 | Tag | Points at |
 | --- | --- |
-| `latest` | The most recent build of `main` (and the newest release). |
-| `main` | The tip of the `main` branch. |
+| `latest` | The most recent build of `main` — a **rolling** tag that can be ahead of the newest release. |
+| `main` | The tip of the `main` branch (same image as the current `latest`). |
 | `sha-<short>` | A specific commit, for reproducible pins. |
 | `X.Y.Z`, `X.Y` | A tagged release (pushed from a `vX.Y.Z` git tag). |
+
+For a stable, reproducible deployment, pin a version tag (`X.Y.Z`) or a
+`sha-<short>` digest rather than `latest`.
 
 The [`Publish container`](./.github/workflows/docker-publish.yml) workflow builds
 and pushes on every push to `main` and on `v*` tags; pull requests only build the
