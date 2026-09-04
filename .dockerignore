@@ -1,0 +1,11 @@
+.git
+.github
+*.md
+!README.md
+deploy
+dist
+diglett
+/tmp
+*_test.go
+.gitignore
+LICENSE

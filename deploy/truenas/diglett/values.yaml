@@ -1,0 +1,32 @@
+# Default values for the Diglett Helm chart. On TrueNAS SCALE these are driven
+# by the GUI form defined in questions.yaml; edit here for plain `helm install`.
+
+image:
+  repository: ghcr.io/zollo/diglett
+  tag: latest
+  pullPolicy: IfNotPresent
+
+# Host port the app is published on (the container always listens on 8080).
+service:
+  nodePort: 30080
+
+# Diglett runtime configuration, surfaced as DIGLETT_* environment variables.
+config:
+  timeout: "5s"
+  maxHostnames: 100
+  maxResolvers: 20
+  allowCustomResolvers: true
+  # Comma-separated resolver IDs pre-selected in the UI.
+  defaultResolvers: "google,cloudflare,quad9"
+
+# Extra environment variables (list of {name, value}) for advanced tuning,
+# e.g. DIGLETT_RESOLVERS to define a fully custom resolver set.
+extraEnv: []
+
+resources:
+  limits:
+    cpu: "1000m"
+    memory: "256Mi"
+  requests:
+    cpu: "10m"
+    memory: "32Mi"

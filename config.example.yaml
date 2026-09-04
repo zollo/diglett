@@ -1,0 +1,70 @@
+# Diglett configuration example.
+#
+# Every value here is optional and falls back to a sensible default. Any value
+# can also be overridden by an environment variable (see the README for the
+# full DIGLETT_* list), and environment variables always win over this file.
+#
+# Point Diglett at this file with either:
+#   diglett -config /etc/diglett/config.yaml
+#   DIGLETT_CONFIG=/etc/diglett/config.yaml diglett
+
+server:
+  # Address and port the HTTP server binds to.
+  host: 0.0.0.0
+  port: 8080
+  # Honour X-Forwarded-For for access logs when behind a reverse proxy.
+  trusted_proxy: false
+
+query:
+  # Timeout for a single DNS exchange.
+  timeout: 5s
+  # Maximum simultaneous in-flight DNS exchanges per request.
+  concurrency: 12
+  # Safety limits for the public, unauthenticated API (0 = unlimited).
+  max_hostnames: 100
+  max_resolvers: 20
+  # Allow API callers to query arbitrary resolver addresses that are not in the
+  # list below (e.g. "8.8.8.8" or "https://my-resolver/dns-query").
+  allow_custom_resolvers: true
+
+# The resolvers offered in the UI and selectable by ID via the API.
+#   protocol: udp (default, with TCP fallback), tcp, tls (DoT), or https (DoH)
+#   address:  host / host:port for udp/tcp/tls; a full URL for https
+#   group:    optional label used to group resolvers in the UI
+resolvers:
+  - id: google
+    name: Google
+    address: 8.8.8.8
+    protocol: udp
+    group: Public
+  - id: cloudflare
+    name: Cloudflare
+    address: 1.1.1.1
+    protocol: udp
+    group: Public
+  - id: quad9
+    name: Quad9
+    address: 9.9.9.9
+    protocol: udp
+    group: Public
+  - id: opendns
+    name: OpenDNS
+    address: 208.67.222.222
+    protocol: udp
+    group: Public
+  - id: cloudflare-doh
+    name: Cloudflare (DoH)
+    address: https://cloudflare-dns.com/dns-query
+    protocol: https
+    group: Encrypted
+  - id: google-doh
+    name: Google (DoH)
+    address: https://dns.google/dns-query
+    protocol: https
+    group: Encrypted
+
+# Resolver IDs pre-selected in the UI and used when an API request names none.
+default_resolvers:
+  - google
+  - cloudflare
+  - quad9
