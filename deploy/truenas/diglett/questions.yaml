@@ -1,0 +1,114 @@
+# TrueNAS SCALE app GUI form. Each variable maps to a value consumed by the
+# chart templates. TrueNAS renders these as form fields during installation.
+groups:
+  - name: Networking
+    description: How Diglett is published on your network.
+  - name: DNS settings
+    description: DNS query behaviour and limits.
+  - name: Advanced
+    description: Container image and resource tuning.
+
+portals:
+  web_portal:
+    protocols:
+      - "$kubernetes-resource_configmap_portal_protocol"
+    host:
+      - "$node_ip"
+    ports:
+      - "$variable-service.nodePort"
+    path: "/"
+
+questions:
+  - variable: service
+    label: Networking
+    group: Networking
+    schema:
+      type: dict
+      attrs:
+        - variable: nodePort
+          label: Web port
+          description: The port Diglett's web UI and API are served on.
+          schema:
+            type: int
+            min: 9000
+            max: 65535
+            default: 30080
+            required: true
+
+  - variable: config
+    label: DNS settings
+    group: DNS settings
+    schema:
+      type: dict
+      attrs:
+        - variable: timeout
+          label: Query timeout
+          description: Timeout for a single DNS exchange (e.g. 5s, 2s500ms).
+          schema:
+            type: string
+            default: "5s"
+        - variable: maxHostnames
+          label: Max hostnames per request
+          schema:
+            type: int
+            default: 100
+            min: 1
+        - variable: maxResolvers
+          label: Max resolvers per request
+          schema:
+            type: int
+            default: 20
+            min: 1
+        - variable: allowCustomResolvers
+          label: Allow custom resolver addresses
+          description: Let API/UI users query arbitrary resolvers not in the list.
+          schema:
+            type: boolean
+            default: true
+        - variable: defaultResolvers
+          label: Default resolvers
+          description: Comma-separated resolver IDs pre-selected in the UI.
+          schema:
+            type: string
+            default: "google,cloudflare,quad9"
+
+  - variable: extraEnv
+    label: Additional environment variables
+    group: Advanced
+    schema:
+      type: list
+      default: []
+      items:
+        - variable: envItem
+          label: Environment variable
+          schema:
+            type: dict
+            attrs:
+              - variable: name
+                label: Name
+                schema:
+                  type: string
+                  required: true
+              - variable: value
+                label: Value
+                schema:
+                  type: string
+
+  - variable: image
+    label: Image
+    group: Advanced
+    schema:
+      type: dict
+      attrs:
+        - variable: repository
+          label: Image repository
+          schema:
+            type: string
+            default: ghcr.io/zollo/diglett
+            required: true
+        - variable: tag
+          label: Image tag
+          schema:
+            type: string
+            default: latest
+            required: true

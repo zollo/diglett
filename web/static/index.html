@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diglett — DNS Lookup</title>
+  <meta name="description" content="Diglett is a free, open-source web DNS lookup tool. Query multiple hostnames and record types across well-known public DNS resolvers.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%95%B3%EF%B8%8F%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1><span class="logo">⛏️</span> Diglett</h1>
+      <p class="tagline">Free, open-source web DNS lookup — powered by an open API.</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <form id="lookup-form" class="card">
+      <div class="field">
+        <label for="hostnames">Hostnames <span class="hint">one per line</span></label>
+        <textarea id="hostnames" name="hostnames" rows="4" placeholder="example.com&#10;github.com&#10;8.8.8.8 (for reverse lookups)" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="type">Record type</label>
+          <select id="type" name="type">
+            <option value="AUTO">Auto-discover (recommended)</option>
+          </select>
+          <p class="hint">Auto-discover queries common record types and shows whichever exist.</p>
+        </div>
+
+        <div class="field options">
+          <label>Options</label>
+          <label class="check"><input type="checkbox" id="reverse" name="reverse"> Reverse (PTR) lookup</label>
+          <label class="check"><input type="checkbox" id="trace" name="trace"> Trace delegation from root</label>
+          <label class="check"><input type="checkbox" id="dnssec" name="dnssec"> Request DNSSEC records</label>
+        </div>
+      </div>
+
+      <fieldset class="field resolvers">
+        <legend>Resolvers <span class="hint">pick one or more</span></legend>
+        <div class="resolver-actions">
+          <button type="button" id="select-all" class="link">Select all</button>
+          <button type="button" id="select-none" class="link">Clear</button>
+          <button type="button" id="select-defaults" class="link">Defaults</button>
+          <input type="text" id="custom-resolver" placeholder="Add custom DNS server: 1.2.3.4 or 9.9.9.9" autocomplete="off">
+          <button type="button" id="add-custom" class="link">Add</button>
+        </div>
+        <div id="resolver-list" class="resolver-grid" aria-live="polite"></div>
+      </fieldset>
+
+      <div class="actions">
+        <button type="submit" id="submit" class="primary">Look up DNS</button>
+        <button type="button" id="share" class="ghost" title="Copy a shareable link for this query">Copy link</button>
+        <span id="status" class="status" role="status"></span>
+      </div>
+    </form>
+
+    <section id="results" class="results" aria-live="polite"></section>
+
+    <details class="api-help card">
+      <summary>Using the API</summary>
+      <p>Everything the UI does is available from an unauthenticated JSON API.</p>
+      <pre><code># Auto-discover records for a hostname
+curl "$BASE/api/lookup?name=example.com"
+
+# Specific type across two resolvers, JSON
+curl -X POST "$BASE/api/lookup" -H 'Content-Type: application/json' -d '{
+  "hostnames": ["example.com", "github.com"],
+  "type": "MX",
+  "resolvers": ["google", "cloudflare"]
+}'
+
+# Terminal-friendly text output
+curl "$BASE/api/lookup?name=example.com&type=A&text=1"
+
+# List available resolvers and record types
+curl "$BASE/api/resolvers"</code></pre>
+    </details>
+  </main>
+
+  <footer class="site-footer wrap">
+    <span id="version"></span>
+    <a href="https://github.com/zollo/diglett">Diglett on GitHub</a> — open source, self-hostable.
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+# Binaries
+/diglett
+/dist/
+*.exe
+*.out
+
+# Local config (never commit real config; use config.example.yaml as a template)
+config.yaml
+config.yml
+config.local.*
+
+# Editor / OS cruft
+.DS_Store
+.idea/
+.vscode/
+*.swp
