@@ -1,0 +1,115 @@
+{{- $env := dict
+  "DIGLETT_TRUSTED_PROXY" .Values.config.trustedProxy
+  "DIGLETT_TIMEOUT" .Values.config.timeout
+  "DIGLETT_CONCURRENCY" .Values.config.concurrency
+  "DIGLETT_MAX_HOSTNAMES" .Values.config.maxHostnames
+  "DIGLETT_MAX_RESOLVERS" .Values.config.maxResolvers
+  "DIGLETT_ALLOW_CUSTOM_RESOLVERS" .Values.config.allowCustomResolvers
+  "DIGLETT_DEFAULT_RESOLVERS" .Values.config.defaultResolvers
+}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "diglett.fullname" . }}
+  labels:
+    {{- include "diglett.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "diglett.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- if or .Values.configFile .Values.podAnnotations }}
+      annotations:
+        {{- if .Values.configFile }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      labels:
+        {{- include "diglett.labels" . | nindent 8 }}
+        {{- with omit .Values.podLabels "app.kubernetes.io/name" "app.kubernetes.io/instance" }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "diglett.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: {{ include "diglett.image" . | quote }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          env:
+            - name: DIGLETT_HOST
+              value: "0.0.0.0"
+            - name: DIGLETT_PORT
+              value: {{ .Values.containerPort | quote }}
+            {{- range $name, $value := $env }}
+            {{- if not (or (kindIs "invalid" $value) (eq (toString $value) "")) }}
+            - name: {{ $name }}
+              value: {{ $value | toString | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.configFile }}
+            - name: DIGLETT_CONFIG
+              value: /etc/diglett/config.yaml
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.configFile }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/diglett
+              readOnly: true
+          {{- end }}
+      {{- if .Values.configFile }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "diglett.fullname" . }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

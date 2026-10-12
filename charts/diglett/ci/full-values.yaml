@@ -1,0 +1,43 @@
+# Exercises every optional template in CI (helm lint / template).
+image:
+  tag: latest
+imagePullSecrets:
+  - name: ghcr
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: diglett.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: diglett-tls
+      hosts:
+        - diglett.example.com
+config:
+  trustedProxy: true
+  maxHostnames: 0
+  allowCustomResolvers: false
+  timeout: 3s
+configFile:
+  resolvers:
+    - id: internal
+      name: Internal DNS
+      address: 10.0.0.53
+      protocol: udp
+      group: Internal
+  default_resolvers:
+    - internal
+extraEnv:
+  - name: DIGLETT_CONCURRENCY
+    value: "8"
+autoscaling:
+  enabled: true
+podDisruptionBudget:
+  enabled: true
+podAnnotations:
+  example.com/owner: dns-team
+podLabels:
+  app.kubernetes.io/name: bogus
+  team: dns
