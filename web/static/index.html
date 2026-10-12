@@ -12,7 +12,7 @@
   <header class="site-header">
     <div class="wrap">
       <h1><span class="logo">⛏️</span> Diglett</h1>
-      <p class="tagline">Free, open-source web DNS lookup — powered by an open API.</p>
+      <p class="tagline">Open-source DNS lookup</p>
     </div>
   </header>
 
@@ -41,15 +41,19 @@
       </div>
 
       <fieldset class="field resolvers">
-        <legend>Resolvers <span class="hint">pick one or more</span></legend>
-        <div class="resolver-actions">
-          <button type="button" id="select-all" class="link">Select all</button>
-          <button type="button" id="select-none" class="link">Clear</button>
-          <button type="button" id="select-defaults" class="link">Defaults</button>
-          <input type="text" id="custom-resolver" placeholder="Add custom DNS server: 1.2.3.4 or 9.9.9.9" autocomplete="off">
-          <button type="button" id="add-custom" class="link">Add</button>
+        <legend>Resolvers <span id="resolver-count" class="count-pill">0 selected</span></legend>
+        <div class="resolver-toolbar">
+          <div class="preset-group" role="group" aria-label="Quick select">
+            <button type="button" id="select-defaults" class="preset">Defaults</button>
+            <button type="button" id="select-all" class="preset">All</button>
+            <button type="button" id="select-none" class="preset">None</button>
+          </div>
+          <div class="custom-add">
+            <input type="text" id="custom-resolver" placeholder="Custom server, e.g. 9.9.9.9" aria-label="Custom DNS server address" autocomplete="off" spellcheck="false">
+            <button type="button" id="add-custom" class="ghost small">Add</button>
+          </div>
         </div>
-        <div id="resolver-list" class="resolver-grid" aria-live="polite"></div>
+        <div id="resolver-list" class="resolver-groups"></div>
       </fieldset>
 
       <div class="actions">
