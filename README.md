@@ -70,24 +70,46 @@ GitHub Container Registry by CI:
 ghcr.io/zollo/diglett
 ```
 
+Every push to `main` cuts a new release (see [Releases & versioning](#releases--versioning)),
+so each published image is tagged:
+
 | Tag | Points at |
 | --- | --- |
-| `latest` | The most recent build of `main` — a **rolling** tag that can be ahead of the newest release. |
-| `main` | The tip of the `main` branch (same image as the current `latest`). |
-| `sha-<short>` | A specific commit, for reproducible pins. |
-| `X.Y.Z`, `X.Y` | A tagged release (pushed from a `vX.Y.Z` git tag). |
+| `latest` | The newest release. |
+| `X.Y.Z` | An exact release, for reproducible deploys. |
+| `X.Y` | The newest patch release in a minor line. |
+| `sha-<short>` | The image built from a specific commit. |
 
-For a stable, reproducible deployment, pin a version tag (`X.Y.Z`) or a
-`sha-<short>` digest rather than `latest`.
+Pin `X.Y.Z` for reproducible deploys, `X.Y` to float within a minor line, or
+`latest` for the newest. Images are cosign-signed and carry a build-provenance
+attestation.
 
-The [`Publish container`](./.github/workflows/docker-publish.yml) workflow builds
-and pushes on every push to `main` and on `v*` tags; pull requests only build the
-image (in [`CI`](./.github/workflows/ci.yml)) without publishing. Cutting a
-release is just a tag:
+## Releases & versioning
 
-```bash
-git tag v1.0.0 && git push origin v1.0.0
-```
+Diglett uses [Semantic Versioning](https://semver.org/) driven by
+[Conventional Commits](https://www.conventionalcommits.org/), automated in
+[`CI`](./.github/workflows/ci.yml):
+
+- **Contribute via PRs with Conventional Commit titles.** A `PR Title` check
+  ([`pr-title.yml`](./.github/workflows/pr-title.yml)) enforces the format, e.g.
+  `feat: add X`, `fix: correct Y`, `docs: …`, `ci: …`. The repo squash-merges
+  with the **PR title as the commit subject**, so the title determines the
+  version bump.
+- **On every merge to `main`**, CI computes the next version from the commits
+  since the last tag — `feat:` → minor, `fix:` → patch, `type!:` (e.g.
+  `feat!:`) → major, otherwise patch — then tags it, publishes a **GitHub
+  Release** with auto-generated notes, and builds/pushes the signed image.
+- The **first** release is seeded at `v1.0.0`.
+- Pull requests run the tests and build the image for both architectures
+  without pushing it.
+
+> Repo setting to enable: **Settings → General → Pull Requests → Allow squash
+> merging**, with **“Default to pull request title”** for the squash commit
+> message. That makes the enforced PR title the commit subject the versioner
+> reads. (This mirrors `zollo/azuregos` and `zollo/certainly`.)
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the commit types and their effect
+on the version.
 
 ---
 
