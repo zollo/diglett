@@ -150,8 +150,11 @@
     $("#resolver-count").classList.toggle("none", n === 0);
     resolverList.querySelectorAll(".resolver-group").forEach((g) => {
       const boxes = Array.from(g.querySelectorAll("input[type=checkbox]"));
-      g.querySelector(".group-toggle").textContent =
-        boxes.length && boxes.every((c) => c.checked) ? "None" : "All";
+      const action = boxes.length && boxes.every((c) => c.checked) ? "None" : "All";
+      const toggle = g.querySelector(".group-toggle");
+      toggle.textContent = action;
+      toggle.setAttribute("aria-label",
+        (action === "All" ? "Select all " : "Clear all ") + g.dataset.group + " resolvers");
     });
   }
 
@@ -307,7 +310,7 @@
         label: host,
         badge: problems ? "!" : (view.differs ? "≠" : null),
         badgeClass: problems ? "bad" : "warn",
-        title: problems ? `${problems} failed or empty response(s)`
+        title: problems ? `${problems} error response(s) (e.g. NXDOMAIN, SERVFAIL, timeout)`
           : (view.differs ? "Resolvers disagree on some answers" : ""),
         panel: view.node,
       });
