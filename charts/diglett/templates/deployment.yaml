@@ -33,7 +33,7 @@ spec:
       {{- end }}
       labels:
         {{- include "diglett.labels" . | nindent 8 }}
-        {{- with .Values.podLabels }}
+        {{- with omit .Values.podLabels "app.kubernetes.io/name" "app.kubernetes.io/instance" }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:

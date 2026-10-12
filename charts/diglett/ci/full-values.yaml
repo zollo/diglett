@@ -38,3 +38,6 @@ podDisruptionBudget:
   enabled: true
 podAnnotations:
   example.com/owner: dns-team
+podLabels:
+  app.kubernetes.io/name: bogus
+  team: dns
