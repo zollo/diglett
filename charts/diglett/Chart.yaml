@@ -4,9 +4,8 @@ description: Free, open-source web DNS lookup tool and API (a self-hosted digweb
 type: application
 # Chart version. Bump on any change to the chart itself (templates or values).
 version: 0.1.0
-# appVersion is left unset until the first Diglett release is published, so
-# image.tag falls back to "latest". Once a vX.Y.Z image exists, set
-# appVersion: "X.Y.Z" here to pin the chart to it.
+# Diglett release the chart deploys by default; image.tag falls back to this.
+appVersion: "1.0.0"
 home: https://github.com/zollo/diglett
 sources:
   - https://github.com/zollo/diglett

@@ -25,9 +25,9 @@ helm upgrade --install diglett ./charts/diglett -n diglett \
 
 ## Image tag
 
-`image.tag` defaults to the chart's `appVersion`, or `latest` (the rolling build
-of `main`) while the chart has none. Set `image.tag` to any published `X.Y.Z`,
-`X.Y` or `sha-<short>` tag to pin a specific build.
+`image.tag` defaults to the chart's `appVersion` (a pinned Diglett release). Set
+`image.tag=latest` to follow the rolling build of `main`, or any published
+`X.Y.Z`, `X.Y` or `sha-<short>` tag.
 
 ## Common values
 
