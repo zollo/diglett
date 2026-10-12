@@ -26,8 +26,8 @@ on merge to `main`. A CI check (`PR Title`) enforces this.
 | `feat!` / `fix!` / any `!` | `feat!: rename the /api/lookup response fields` | **major** (**X**.0.0) |
 | `docs`, `chore`, `ci`, `build`, `refactor`, `perf`, `test`, `style`, `revert` | `docs: document resolver config` | patch (default) |
 
-A breaking change can also be signalled with a `BREAKING CHANGE:` footer in the
-PR body.
+Mark a breaking change with `!` in the PR title. A `BREAKING CHANGE:` footer in
+the PR body is not enough on its own: the squash commit keeps only the title.
 
 ### Guidelines
 - Keep the subject imperative and lowercase, no trailing period

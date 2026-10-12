@@ -96,8 +96,8 @@ Diglett uses [Semantic Versioning](https://semver.org/) driven by
   with the **PR title as the commit subject**, so the title determines the
   version bump.
 - **On every merge to `main`**, CI computes the next version from the commits
-  since the last tag — `feat:` → minor, `fix:` → patch, `BREAKING CHANGE:` (or
-  `type!:`) → major, otherwise patch — then tags it, publishes a **GitHub
+  since the last tag — `feat:` → minor, `fix:` → patch, `type!:` (e.g.
+  `feat!:`) → major, otherwise patch — then tags it, publishes a **GitHub
   Release** with auto-generated notes, and builds/pushes the signed image.
 - The **first** release is seeded at `v1.0.0`.
 - Pull requests run the tests and build the image for both architectures
