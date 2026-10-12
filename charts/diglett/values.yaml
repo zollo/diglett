@@ -1,0 +1,139 @@
+# Default values for the Diglett chart.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/zollo/diglett
+  # Defaults to the chart appVersion; set "latest" to track the rolling build of main.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# Needed while the GHCR package is private, e.g.
+#   kubectl create secret docker-registry ghcr --docker-server=ghcr.io \
+#     --docker-username=<user> --docker-password=<PAT with read:packages>
+# imagePullSecrets:
+#   - name: ghcr
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  # Diglett never talks to the Kubernetes API.
+  automount: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+# Matches the distroless nonroot user baked into the image.
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  fsGroup: 65532
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# Port the container listens on (passed as DIGLETT_PORT).
+containerPort: 8080
+
+service:
+  type: ClusterIP
+  port: 80
+  # Only used when type is NodePort or LoadBalancer.
+  nodePort: null
+  annotations: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: diglett.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: diglett-tls
+  #    hosts:
+  #      - diglett.example.com
+
+# Diglett runtime settings, rendered as DIGLETT_* environment variables.
+# Unset values keep the application default (shown in comments), so they don't
+# mask anything set in configFile. Environment variables win over configFile.
+config:
+  # Honour X-Forwarded-For in access logs; enable behind an ingress or proxy. (false)
+  trustedProxy: null
+  # Timeout for a single DNS exchange. (5s)
+  timeout: ""
+  # Simultaneous in-flight DNS exchanges per request. (12)
+  concurrency: null
+  # Hostnames per request, 0 = unlimited. (100)
+  maxHostnames: null
+  # Resolvers per request, 0 = unlimited. (20)
+  maxResolvers: null
+  # Allow API callers to query arbitrary resolver addresses. (true)
+  allowCustomResolvers: null
+  # Comma-separated resolver IDs pre-selected in the UI. (google,cloudflare,quad9)
+  defaultResolvers: ""
+
+# Optional full config file (same format as config.example.yaml in the repo),
+# mounted from a ConfigMap and passed via DIGLETT_CONFIG. Use it to define a
+# custom resolver list. Values under `config` above still override it.
+configFile: {}
+#  resolvers:
+#    - id: internal
+#      name: Internal DNS
+#      address: 10.0.0.53
+#      protocol: udp
+#      group: Internal
+#  default_resolvers:
+#    - internal
+
+# Extra environment variables for the container (standard EnvVar objects).
+extraEnv: []
+#  - name: DIGLETT_RESOLVERS
+#    value: "internal|Internal DNS|10.0.0.53|udp|Internal"
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 30
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  periodSeconds: 10
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+topologySpreadConstraints: []

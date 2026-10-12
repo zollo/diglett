@@ -54,6 +54,15 @@ go run .            # listens on :8080
 make build && ./diglett -config config.yaml
 ```
 
+### Deploy on Kubernetes (Helm)
+
+```bash
+helm install diglett ./charts/diglett --namespace diglett --create-namespace
+```
+
+See [`charts/diglett/`](./charts/diglett) for values, ingress, custom resolvers
+and pulling from a private registry.
+
 ### Deploy on TrueNAS SCALE
 
 See [`deploy/truenas/`](./deploy/truenas) for both the Docker-Compose custom-app
@@ -246,6 +255,7 @@ internal/config             layered configuration (defaults, YAML, env)
 internal/lookup             DNS query engine (transports, discovery, trace)
 internal/server             HTTP API + embedded UI serving
 web/static                  the web UI (embedded)
+charts/diglett              Helm chart for Kubernetes
 deploy/truenas              TrueNAS SCALE Helm chart + custom-app compose
 Dockerfile, docker-compose.yml
 ```

@@ -1,0 +1,24 @@
+Diglett {{ include "diglett.imageTag" . }} is deployed as {{ include "diglett.fullname" . }}.
+{{- if .Values.ingress.enabled }}
+
+Open:
+{{- range .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ .host }}{{ (first .paths).path }}
+{{- end }}
+{{- else if eq .Values.service.type "LoadBalancer" }}
+
+Get the external address (it may take a minute to appear):
+  kubectl get svc -n {{ .Release.Namespace }} {{ include "diglett.fullname" . }}
+{{- else if eq .Values.service.type "NodePort" }}
+
+Open http://<node-ip>:$(kubectl get svc -n {{ .Release.Namespace }} {{ include "diglett.fullname" . }} -o jsonpath='{.spec.ports[0].nodePort}')
+{{- else }}
+
+Forward a local port and open http://127.0.0.1:8080:
+  kubectl port-forward -n {{ .Release.Namespace }} svc/{{ include "diglett.fullname" . }} 8080:{{ .Values.service.port }}
+{{- end }}
+{{- if not .Values.imagePullSecrets }}
+
+If pods sit in ImagePullBackOff, the GHCR package is private: create a
+docker-registry secret for ghcr.io and set imagePullSecrets.
+{{- end }}

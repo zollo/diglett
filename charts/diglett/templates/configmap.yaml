@@ -1,0 +1,11 @@
+{{- if .Values.configFile }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "diglett.fullname" . }}
+  labels:
+    {{- include "diglett.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+    {{- toYaml .Values.configFile | nindent 4 }}
+{{- end }}

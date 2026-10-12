@@ -1,0 +1,33 @@
+name: Helm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "charts/**"
+      - ".github/workflows/helm.yml"
+  pull_request:
+    paths:
+      - "charts/**"
+      - ".github/workflows/helm.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint chart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+      - name: Lint (default values)
+        run: helm lint charts/diglett --strict
+      - name: Lint (all optional features enabled)
+        run: helm lint charts/diglett --strict -f charts/diglett/ci/full-values.yaml
+      - name: Render
+        run: |
+          helm template diglett charts/diglett > /dev/null
+          helm template diglett charts/diglett -f charts/diglett/ci/full-values.yaml > /dev/null
