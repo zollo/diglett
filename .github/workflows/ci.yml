@@ -220,7 +220,13 @@ jobs:
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
           helm push "dist/diglett-${VERSION}.tgz" "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts"
+      # The TrueNAS chart is also named "diglett", so package it separately and
+      # rename it; it is attached to the release only, not pushed to GHCR.
+      - name: Package TrueNAS chart
+        run: |
+          helm package deploy/truenas/diglett --version "$VERSION" --app-version "$VERSION" --destination dist/truenas
+          mv "dist/truenas/diglett-${VERSION}.tgz" "dist/diglett-truenas-${VERSION}.tgz"
       - name: Attach to GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$TAG" "dist/diglett-${VERSION}.tgz" --clobber
+        run: gh release upload "$TAG" "dist/diglett-${VERSION}.tgz" "dist/diglett-truenas-${VERSION}.tgz" --clobber

@@ -21,10 +21,16 @@ TrueNAS `questions.yaml` GUI form.
 
 ### Install directly with Helm
 
+Each [GitHub release](https://github.com/zollo/diglett/releases) attaches
+`diglett-truenas-X.Y.Z.tgz`, this chart packaged at the release version and
+pinned to the matching image:
+
 ```bash
-helm install diglett ./deploy/truenas/diglett \
-  --set service.nodePort=30080
+helm install diglett diglett-truenas-X.Y.Z.tgz --set service.nodePort=30080
 ```
+
+Installing from a source checkout (`./deploy/truenas/diglett`) runs the
+`latest` image instead.
 
 Then browse to `http://<node-ip>:30080`.
 

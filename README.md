@@ -109,7 +109,8 @@ Diglett uses [Semantic Versioning](https://semver.org/) driven by
   `feat!:`) → major, otherwise patch — then tags it, publishes a **GitHub
   Release** with auto-generated notes, builds/pushes the signed image, and
   publishes the Helm chart at the same version to
-  `oci://ghcr.io/zollo/charts/diglett` (also attached to the release).
+  `oci://ghcr.io/zollo/charts/diglett` (also attached to the release, with the
+  TrueNAS chart as `diglett-truenas-X.Y.Z.tgz`).
 - The **first** release is seeded at `v1.0.0`.
 - Pull requests run the tests and build the image for both architectures
   without pushing it.

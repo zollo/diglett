@@ -3,8 +3,11 @@ name: diglett
 title: Diglett
 description: Free, open-source web DNS lookup tool and API (a self-hosted digwebinterface).
 type: application
-version: 1.0.0
-appVersion: "1.0.0"
+# Placeholders: the release job in .github/workflows/ci.yml packages this chart
+# with version and appVersion set to the release (X.Y.Z) and attaches it to the
+# GitHub release. A source checkout has no appVersion, so the image tag falls
+# back to "latest".
+version: 0.0.0-dev
 home: https://github.com/zollo/diglett
 sources:
   - https://github.com/zollo/diglett

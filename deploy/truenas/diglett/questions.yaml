@@ -108,7 +108,7 @@ questions:
             required: true
         - variable: tag
           label: Image tag
+          description: Leave empty to run the Diglett release this chart was packaged from, or set an X.Y.Z, X.Y or latest tag.
           schema:
             type: string
-            default: latest
-            required: true
+            default: ""
