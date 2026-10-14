@@ -6,27 +6,45 @@ optional Ingress, ConfigMap-mounted config file, HPA and PodDisruptionBudget.
 
 ## Install
 
+Every Diglett release publishes the chart to GHCR as an OCI artifact, with the
+chart version equal to the release version:
+
 ```bash
-helm install diglett ./charts/diglett --namespace diglett --create-namespace
+helm install diglett oci://ghcr.io/zollo/charts/diglett --version X.Y.Z \
+  --namespace diglett --create-namespace
 kubectl port-forward -n diglett svc/diglett 8080:80   # then open http://127.0.0.1:8080
 ```
 
-### Private image
+Omit `--version` for the newest release. If the chart package is still private,
+log in first (see [Private packages](#private-packages)). The packaged chart is also attached to
+each [GitHub release](https://github.com/zollo/diglett/releases). From a source
+checkout, `helm install diglett ./charts/diglett` deploys the `latest` image.
 
-While the `ghcr.io/zollo/diglett` package is private, give the cluster a pull
-secret (a GitHub PAT with `read:packages`):
+### Private packages
+
+GHCR packages start private. While the chart package is private, log the Helm
+client in before installing (a GitHub PAT with `read:packages`); the image pull
+secret below does not cover the chart download:
+
+```bash
+echo <PAT> | helm registry login ghcr.io -u <github-user> --password-stdin
+```
+
+While the `ghcr.io/zollo/diglett` image package is private, also give the
+cluster a pull secret:
 
 ```bash
 kubectl create secret docker-registry ghcr -n diglett \
   --docker-server=ghcr.io --docker-username=<github-user> --docker-password=<PAT>
-helm upgrade --install diglett ./charts/diglett -n diglett \
+helm upgrade --install diglett oci://ghcr.io/zollo/charts/diglett -n diglett \
   --set 'imagePullSecrets[0].name=ghcr'
 ```
 
 ## Image tag
 
-`image.tag` defaults to the chart's `appVersion` (a pinned Diglett release). Set
-`image.tag=latest` to follow the rolling build of `main`, or any published
+A published chart's `appVersion` is the release it was cut from, and `image.tag`
+defaults to it, so chart `X.Y.Z` deploys image `X.Y.Z`. A source checkout has no
+`appVersion` and uses `latest`. Override `image.tag` with any published
 `X.Y.Z`, `X.Y` or `sha-<short>` tag.
 
 ## Common values

@@ -4,7 +4,8 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/zollo/diglett
-  # Defaults to the chart appVersion; set "latest" to track the rolling build of main.
+  # Defaults to the chart appVersion (the release a published chart was cut
+  # from), or "latest" when installing from a source checkout.
   tag: ""
   pullPolicy: IfNotPresent
 

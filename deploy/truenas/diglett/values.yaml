@@ -3,7 +3,8 @@
 
 image:
   repository: ghcr.io/zollo/diglett
-  tag: latest
+  # Empty = the release this chart was packaged from ("latest" from a source checkout).
+  tag: ""
   pullPolicy: IfNotPresent
 
 # Host port the app is published on (the container always listens on 8080).

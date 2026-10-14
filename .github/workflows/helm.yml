@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - "charts/**"
+      - "deploy/truenas/diglett/**"
       - ".github/workflows/helm.yml"
   pull_request:
     paths:
       - "charts/**"
+      - "deploy/truenas/diglett/**"
       - ".github/workflows/helm.yml"
 
 permissions:
@@ -27,6 +29,12 @@ jobs:
         run: helm lint charts/diglett --strict
       - name: Lint (all optional features enabled)
         run: helm lint charts/diglett --strict -f charts/diglett/ci/full-values.yaml
+      - name: Lint TrueNAS chart
+        run: helm lint deploy/truenas/diglett --strict
+      - name: Package (as the release job does)
+        run: |
+          helm package charts/diglett --version 0.0.0-ci --app-version 0.0.0-ci --destination dist
+          helm package deploy/truenas/diglett --version 0.0.0-ci --app-version 0.0.0-ci --destination dist/truenas
       - name: Render
         run: |
           helm template diglett charts/diglett > /dev/null

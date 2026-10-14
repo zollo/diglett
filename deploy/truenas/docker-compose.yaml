@@ -6,6 +6,8 @@
 
 services:
   diglett:
+    # "latest" is the newest release. Pin an exact release (e.g. :1.2.0) for
+    # reproducible installs, or :X.Y to take only patch releases.
     image: ghcr.io/zollo/diglett:latest
     container_name: diglett
     restart: unless-stopped

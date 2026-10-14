@@ -194,3 +194,39 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.build.outputs.digest }}
           push-to-registry: true
+
+  # Publish the Helm chart in lockstep with the image: chart version and
+  # appVersion are both the release version, so chart X.Y.Z deploys image X.Y.Z.
+  # Runs after the image job so the chart never points at a missing image.
+  chart:
+    name: Package & publish Helm chart
+    needs: [version, images]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write        # attach the chart to the GitHub release
+      packages: write        # push the chart to GHCR
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      TAG: ${{ needs.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.16.4
+      - name: Package
+        run: helm package charts/diglett --version "$VERSION" --app-version "$VERSION" --destination dist
+      - name: Push to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | helm registry login ${{ env.REGISTRY }} -u "${{ github.actor }}" --password-stdin
+          helm push "dist/diglett-${VERSION}.tgz" "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts"
+      # The TrueNAS chart is also named "diglett", so package it separately and
+      # rename it; it is attached to the release only, not pushed to GHCR.
+      - name: Package TrueNAS chart
+        run: |
+          helm package deploy/truenas/diglett --version "$VERSION" --app-version "$VERSION" --destination dist/truenas
+          mv "dist/truenas/diglett-${VERSION}.tgz" "dist/diglett-truenas-${VERSION}.tgz"
+      - name: Attach to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$TAG" "dist/diglett-${VERSION}.tgz" "dist/diglett-truenas-${VERSION}.tgz" --clobber
