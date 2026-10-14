@@ -15,14 +15,23 @@ helm install diglett oci://ghcr.io/zollo/charts/diglett --version X.Y.Z \
 kubectl port-forward -n diglett svc/diglett 8080:80   # then open http://127.0.0.1:8080
 ```
 
-Omit `--version` for the newest release. The packaged chart is also attached to
+Omit `--version` for the newest release. If the chart package is still private,
+log in first (see [Private packages](#private-packages)). The packaged chart is also attached to
 each [GitHub release](https://github.com/zollo/diglett/releases). From a source
 checkout, `helm install diglett ./charts/diglett` deploys the `latest` image.
 
-### Private image
+### Private packages
 
-While the `ghcr.io/zollo/diglett` package is private, give the cluster a pull
-secret (a GitHub PAT with `read:packages`):
+GHCR packages start private. While the chart package is private, log the Helm
+client in before installing (a GitHub PAT with `read:packages`); the image pull
+secret below does not cover the chart download:
+
+```bash
+echo <PAT> | helm registry login ghcr.io -u <github-user> --password-stdin
+```
+
+While the `ghcr.io/zollo/diglett` image package is private, also give the
+cluster a pull secret:
 
 ```bash
 kubectl create secret docker-registry ghcr -n diglett \

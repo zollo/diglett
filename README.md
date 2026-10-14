@@ -60,8 +60,9 @@ make build && ./diglett -config config.yaml
 helm install diglett oci://ghcr.io/zollo/charts/diglett --namespace diglett --create-namespace
 ```
 
-See [`charts/diglett/`](./charts/diglett) for values, ingress, custom resolvers
-and pulling from a private registry.
+If the GHCR packages are private, run `helm registry login ghcr.io` first. See
+[`charts/diglett/`](./charts/diglett) for values, ingress, custom resolvers and
+pulling from a private registry.
 
 ### Deploy on TrueNAS SCALE
 
