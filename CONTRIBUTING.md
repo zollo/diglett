@@ -37,6 +37,8 @@ the PR body is not enough on its own: the squash commit keeps only the title.
 ## Releases
 
 On merge to `main`, CI computes the next `vX.Y.Z` from the PR title, tags it,
-creates a GitHub release, and builds, signs and attests the container image
-(`latest`, `X.Y.Z`, `X.Y`, `sha-<short>`). See the README's **Releases & versioning**
+creates a GitHub release, builds, signs and attests the container image
+(`latest`, `X.Y.Z`, `X.Y`, `sha-<short>`), and publishes the Helm chart with
+version and appVersion `X.Y.Z` to `oci://ghcr.io/zollo/charts`. Don't bump
+`charts/diglett/Chart.yaml` by hand. See the README's **Releases & versioning**
 section.

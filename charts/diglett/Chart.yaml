@@ -2,10 +2,11 @@ apiVersion: v2
 name: diglett
 description: Free, open-source web DNS lookup tool and API (a self-hosted digwebinterface).
 type: application
-# Chart version. Bump on any change to the chart itself (templates or values).
-version: 0.1.0
-# Diglett release the chart deploys by default; image.tag falls back to this.
-appVersion: "1.0.0"
+# Placeholders: the release job in .github/workflows/ci.yml packages the chart
+# with version and appVersion both set to the release (X.Y.Z) and publishes it
+# to oci://ghcr.io/zollo/charts. A source checkout has no appVersion, so
+# image.tag falls back to "latest".
+version: 0.0.0-dev
 home: https://github.com/zollo/diglett
 sources:
   - https://github.com/zollo/diglett

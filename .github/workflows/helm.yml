@@ -27,6 +27,8 @@ jobs:
         run: helm lint charts/diglett --strict
       - name: Lint (all optional features enabled)
         run: helm lint charts/diglett --strict -f charts/diglett/ci/full-values.yaml
+      - name: Package (as the release job does)
+        run: helm package charts/diglett --version 0.0.0-ci --app-version 0.0.0-ci --destination dist
       - name: Render
         run: |
           helm template diglett charts/diglett > /dev/null

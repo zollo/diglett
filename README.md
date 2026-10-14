@@ -57,7 +57,7 @@ make build && ./diglett -config config.yaml
 ### Deploy on Kubernetes (Helm)
 
 ```bash
-helm install diglett ./charts/diglett --namespace diglett --create-namespace
+helm install diglett oci://ghcr.io/zollo/charts/diglett --namespace diglett --create-namespace
 ```
 
 See [`charts/diglett/`](./charts/diglett) for values, ingress, custom resolvers
@@ -107,7 +107,9 @@ Diglett uses [Semantic Versioning](https://semver.org/) driven by
 - **On every merge to `main`**, CI computes the next version from the commits
   since the last tag — `feat:` → minor, `fix:` → patch, `type!:` (e.g.
   `feat!:`) → major, otherwise patch — then tags it, publishes a **GitHub
-  Release** with auto-generated notes, and builds/pushes the signed image.
+  Release** with auto-generated notes, builds/pushes the signed image, and
+  publishes the Helm chart at the same version to
+  `oci://ghcr.io/zollo/charts/diglett` (also attached to the release).
 - The **first** release is seeded at `v1.0.0`.
 - Pull requests run the tests and build the image for both architectures
   without pushing it.
