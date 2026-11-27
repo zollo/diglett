@@ -39,7 +39,7 @@
       statusEl.textContent = "Failed to load resolvers: " + e.message;
     }
     fetch("api/version").then(r => r.json()).then(v => {
-      $("#version").textContent = "Diglett " + (v.version || "") + " · ";
+      $("#version").textContent = "Diglett " + (v.version || "");
     }).catch(() => {});
     applyStateFromURL();
   }
@@ -498,6 +498,24 @@
       statusEl.textContent = location.href;
     }
   });
+
+  // Light/dark toggle. Dark blue is the default; a choice is remembered.
+  const themeBtn = $("#theme-toggle");
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  }
+  function syncThemeButton() {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    themeBtn.setAttribute("aria-label", "Switch to " + next + " mode");
+    themeBtn.title = "Switch to " + next + " mode";
+  }
+  themeBtn.addEventListener("click", () => {
+    const next = currentTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    try { localStorage.setItem("diglett_theme", next); } catch { /* private mode */ }
+    syncThemeButton();
+  });
+  syncThemeButton();
 
   init();
 })();

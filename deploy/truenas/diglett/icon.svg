@@ -1,9 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <rect width="128" height="128" rx="24" fill="#171d2b"/>
-  <circle cx="64" cy="72" r="34" fill="#c8853f"/>
-  <ellipse cx="64" cy="86" rx="20" ry="14" fill="#e0a463"/>
-  <circle cx="52" cy="66" r="6" fill="#0f1420"/>
-  <circle cx="76" cy="66" r="6" fill="#0f1420"/>
-  <path d="M46 40 L64 20 L82 40 Z" fill="#c8853f"/>
-  <rect x="58" y="80" width="12" height="10" rx="2" fill="#0f1420"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#071433"/>
+      <stop offset="0.55" stop-color="#0e3685"/>
+      <stop offset="1" stop-color="#1f6fe5"/>
+    </linearGradient>
+    <clipPath id="sq"><rect x="8" y="8" width="240" height="240" rx="52"/></clipPath>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)"/>
+  <g clip-path="url(#sq)">
+    <!-- burrow opening (behind the burrower) -->
+    <ellipse cx="128" cy="172" rx="52" ry="12" fill="#050d24"/>
+    <!-- burrower: faceted capsule (light left, shaded right) -->
+    <path d="M92 182 V92 A36 36 0 0 1 128 56 V182 Z" fill="#f4f7ff"/>
+    <path d="M128 56 A36 36 0 0 1 164 92 V182 H128 Z" fill="#c3d2f5"/>
+    <ellipse cx="115" cy="94" rx="5.5" ry="9" fill="#0a1a46"/>
+    <ellipse cx="141" cy="94" rx="5.5" ry="9" fill="#0a1a46"/>
+    <ellipse cx="128" cy="113" rx="13" ry="7.5" fill="#ff8fab"/>
+    <!-- faceted mound; its top edge is the front rim of the burrow -->
+    <path d="M-40 250 Q20 186 76 172 A52 12 0 0 0 128 184 V300 H-40 Z" fill="#e3ebfd"/>
+    <path d="M128 184 A52 12 0 0 0 180 172 Q236 186 296 250 V300 H128 Z" fill="#aec1ec"/>
+    <path d="M40 196 L76 172 L92 190 Z" fill="#cfdbf8"/>
+    <path d="M216 196 L180 172 L164 190 Z" fill="#97aee3"/>
+    <!-- tunnels: a DNS tree (root -> TLDs -> names) -->
+    <g fill="none" stroke="#0b2160" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M128 190 V204 M128 204 L96 220 M128 204 L160 220 M96 220 L84 238 M96 220 L108 238 M160 220 L172 238"/>
+    </g>
+    <g fill="#0b2160">
+      <circle cx="128" cy="204" r="7"/>
+      <circle cx="96" cy="220" r="6"/>
+      <circle cx="160" cy="220" r="6"/>
+    </g>
+  </g>
 </svg>
