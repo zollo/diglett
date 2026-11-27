@@ -51,6 +51,17 @@ func TestStaticIndex(t *testing.T) {
 	}
 }
 
+func TestWebManifestContentType(t *testing.T) {
+	cfg := config.Default()
+	svc := lookup.NewService(lookup.Options{Resolvers: cfg.Resolvers, Defaults: cfg.ValidDefaults()})
+	static := fstest.MapFS{"site.webmanifest": &fstest.MapFile{Data: []byte(`{"name":"Diglett"}`)}}
+	rr := httptest.NewRecorder()
+	New(cfg, svc, static, "test").Handler().ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/site.webmanifest", nil))
+	if ct := rr.Header().Get("Content-Type"); rr.Code != http.StatusOK || ct != "application/manifest+json" {
+		t.Fatalf("manifest: %d %q", rr.Code, ct)
+	}
+}
+
 func TestLookupValidation(t *testing.T) {
 	h := testServer().Handler()
 

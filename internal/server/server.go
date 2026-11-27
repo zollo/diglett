@@ -4,12 +4,19 @@ package server
 import (
 	"context"
 	"io/fs"
+	"mime"
 	"net/http"
 	"time"
 
 	"github.com/zollo/diglett/internal/config"
 	"github.com/zollo/diglett/internal/lookup"
 )
+
+func init() {
+	// Go's built-in MIME table (and distroless images) don't know the web app
+	// manifest extension; without this it is served as text/plain.
+	_ = mime.AddExtensionType(".webmanifest", "application/manifest+json")
+}
 
 // Server wires the DNS lookup service to HTTP handlers.
 type Server struct {
